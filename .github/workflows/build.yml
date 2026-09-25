@@ -1,24 +1,26 @@
-name: Build SwiftUI App
+name: Build iOS IPA
 
 on:
   push:
     branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
 
 jobs:
-  build:
+  build-ipa:
     runs-on: macos-latest
 
     steps:
-    - name: Repodaki Kodları Çek
+    - name: Repoyu Çek
       uses: actions/checkout@v4
 
-    - name: macOS/Xcode Sürümünü Kontrol Et
+    - name: Xcode İle iOS (.ipa) Paketi Oluştur
       run: |
-        xcodebuild -version
-        swift --version
+        mkdir -p Payload
+        swift build -c release --triple arm64-apple-ios17.0-simulator
+        cp -R .build/arm64-apple-ios17.0-simulator/release/GlassNotes Payload/GlassNotes.app
+        zip -r GlassNotes.ipa Payload
 
-    - name: Swift Kodunu Derle (Build)
-      run: |
-        swift build -v
+    - name: IPA Dosyasını Çıktı Olarak Kaydet (Artifact)
+      uses: actions/upload-artifact@v4
+      with:
+        name: GlassNotes-IPA
+        path: GlassNotes.ipa
