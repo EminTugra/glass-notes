@@ -12,45 +12,23 @@ jobs:
     - name: Repoyu Çek
       uses: actions/checkout@v4
 
-    - name: iOS SDK İle Derle ve .app Paketi Yap
+    - name: XcodeGen Kur ve Proje Oluştur
       run: |
-        # iOS SDK yolunu al ve derle
-        SDK_PATH=$(xcrun --sdk iphoneos --show-sdk-path)
-        swift build -c release \
-                    -Xswiftc -sdk -Xswiftc "$SDK_PATH" \
-                    -Xswiftc -target -Xswiftc arm64-apple-ios17.0
+        brew install xcodegen
+        xcodegen generate
 
-        # iOS .app klasör yapısını ve binary dosyasını hazırla
-        mkdir -p Payload/GlassNotes.app
-        cp .build/arm64-apple-ios17.0/release/GlassNotes Payload/GlassNotes.app/GlassNotes
+    - name: iOS Uygulamasını Derle ve Paketle
+      run: |
+        xcodebuild archive \
+                   -project GlassNotes.xcodeproj \
+                   -scheme GlassNotes \
+                   -destination "generic/platform=iOS" \
+                   -archivePath build/GlassNotes.xcarchive \
+                   CODE_SIGNING_ALLOWED=NO \
+                   CODE_SIGNING_REQUIRED=NO
 
-        # AltStore için zorunlu Info.plist dosyasını oluştur
-        cat <<EOF > Payload/GlassNotes.app/Info.plist
-        <?xml version="1.0" encoding="UTF-8"?>
-        <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-        <plist version="1.0">
-        <dict>
-            <key>CFBundleExecutable</key>
-            <string>GlassNotes</string>
-            <key>CFBundleIdentifier</key>
-            <string>com.emintugra.glassnotes</string>
-            <key>CFBundleName</key>
-            <string>GlassNotes</string>
-            <key>CFBundlePackageType</key>
-            <string>APPL</string>
-            <key>CFBundleShortVersionString</key>
-            <string>1.0</string>
-            <key>CFBundleVersion</key>
-            <string>1</string>
-            <key>LSRequiresIPhoneOS</key>
-            <true/>
-            <key>MinimumOSVersion</key>
-            <string>17.0</string>
-        </dict>
-        </plist>
-        EOF
-
-        # .ipa olarak paketle
+        mkdir -p Payload
+        cp -R build/GlassNotes.xcarchive/Products/Applications/GlassNotes.app Payload/
         zip -r GlassNotes.ipa Payload
 
     - name: IPA Dosyasını Çıktı Olarak Kaydet (Artifact)
