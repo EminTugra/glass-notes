@@ -1,0 +1,17 @@
+name: GlassNotes
+options:
+  bundleIdPrefix: com.emintugra
+targets:
+  GlassNotes:
+    type: application
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: ContentView.swift
+      - path: GlassNotesApp.swift
+    settings:
+      PRODUCT_BUNDLE_IDENTIFIER: com.emintugra.glassnotes
+      INFOPLIST_GENERATE_APPEARANCE_SETTINGS: YES
+      GENERATE_INFOPLIST_FILE: YES
+      MARKETING_VERSION: "1.0"
+      CURRENT_PROJECT_VERSION: "1"
