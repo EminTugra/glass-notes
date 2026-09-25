@@ -1,1 +1,24 @@
+name: Build SwiftUI App
 
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+    - name: Repodaki Kodları Çek
+      uses: actions/checkout@v4
+
+    - name: macOS/Xcode Sürümünü Kontrol Et
+      run: |
+        xcodebuild -version
+        swift --version
+
+    - name: Swift Kodunu Derle (Build)
+      run: |
+        swift build -v
