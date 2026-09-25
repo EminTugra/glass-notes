@@ -12,16 +12,17 @@ jobs:
     - name: Repoyu Çek
       uses: actions/checkout@v4
 
-    - name: Xcode İle iOS Projesi Derle ve Pakotle
+    - name: Xcode İle iOS (.ipa) Derle
       run: |
-        xcodebuild -scheme GlassNotes \
-                   -sdk iphoneos \
+        xcodebuild build \
+                   -scheme GlassNotes \
+                   -destination "generic/platform=iOS" \
                    -configuration Release \
                    -derivedDataPath build \
                    CODE_SIGNING_ALLOWED=NO
 
         mkdir -p Payload
-        cp -R build/Build/Products/Release-iphoneos/GlassNotes.app Payload/
+        cp -R build/Build/Products/Release-iphoneos/GlassNotes.app Payload/ 2>/dev/null || cp -R build/Build/Products/Release-iphoneos/GlassNotes Payload/GlassNotes.app
         zip -r GlassNotes.ipa Payload
 
     - name: IPA Dosyasını Çıktı Olarak Kaydet (Artifact)
