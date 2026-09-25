@@ -12,18 +12,19 @@ jobs:
     - name: Repoyu Çek
       uses: actions/checkout@v4
 
-    - name: iOS İçin Derle ve Uygulama Paketi Oluştur
+    - name: iOS SDK İle Derle ve .app Paketi Yap
       run: |
-        # Swift kodunu release modunda iOS cihazlar için derle
-        swift build -c release --triple arm64-apple-ios17.0
+        # iOS SDK yolunu al ve derle
+        SDK_PATH=$(xcrun --sdk iphoneos --show-sdk-path)
+        swift build -c release \
+                    -Xswiftc -sdk -Xswiftc "$SDK_PATH" \
+                    -Xswiftc -target -Xswiftc arm64-apple-ios17.0
 
-        # Geçerli bir iOS .app klasör yapısı oluştur
+        # iOS .app klasör yapısını ve binary dosyasını hazırla
         mkdir -p Payload/GlassNotes.app
-        
-        # Derlenen çalıştırılabilir dosyayı kopyala
         cp .build/arm64-apple-ios17.0/release/GlassNotes Payload/GlassNotes.app/GlassNotes
 
-        # Minimal bir Info.plist dosyası oluştur (AltStore'un tanıması için şarttır)
+        # AltStore için zorunlu Info.plist dosyasını oluştur
         cat <<EOF > Payload/GlassNotes.app/Info.plist
         <?xml version="1.0" encoding="UTF-8"?>
         <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -49,7 +50,7 @@ jobs:
         </plist>
         EOF
 
-        # .ipa olarak sıkıştır
+        # .ipa olarak paketle
         zip -r GlassNotes.ipa Payload
 
     - name: IPA Dosyasını Çıktı Olarak Kaydet (Artifact)
